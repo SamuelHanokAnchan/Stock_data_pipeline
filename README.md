@@ -38,7 +38,7 @@ This project is a real-time stock data processing pipeline that integrates Kafka
    - Open `http://localhost:5000` in your browser.
 
 ## Security Notice
-The JSON key file for GCP (`srh-project-bdd-2061d9042f25.json`) has been deleted from the repository for security reasons. To use GCP storage, generate a new key from your GCP console and place it in the appropriate directory.
+The JSON key file for GCP has been deleted from the repository for security reasons. To use GCP storage, generate a new key from your GCP console and place it in the appropriate directory.
 
 ## Future Enhancements
 - Upgrade machine learning models (LSTM, Transformers for better accuracy)
