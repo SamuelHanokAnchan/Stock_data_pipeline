@@ -11,11 +11,11 @@ consumer = KafkaConsumer(
     value_deserializer=lambda x: json.loads(x.decode('utf-8'))
 )
 
-atlas_client = MongoClient("mongodb+srv://Francis:Bfe04@cluster0.0na1f.mongodb.net")
+atlas_client = MongoClient("")#replace with mongoBD atlas connection key
 db = atlas_client['stock_database']      
 collection = db['stock_prices']          
 
-gcs_client = storage.Client.from_service_account_json('srh-project-bdd-2061d9042f25.json')
+gcs_client = storage.Client.from_service_account_json('')#replace with actual google service key
 bucket_name = 'stockdata_backup'     
 bucket = gcs_client.bucket(bucket_name)
 
