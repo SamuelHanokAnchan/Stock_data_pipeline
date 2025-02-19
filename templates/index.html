@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Stock Data Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: monospace;
+    }
+
+    .container {
+      display: flex;
+      height: 100vh;
+    }
+    .left-panel {
+      width: 30%;
+      padding: 10px;
+      border-right: 1px solid #444;
+      overflow-y: auto;
+      background-color: #000;      
+      color: #00ff00;             
+    }
+    .left-panel h2 {
+      margin-top: 0;
+    }
+    .message {
+      font-size: 0.9em;
+      margin-bottom: 5px;
+    }
+
+    .right-panel {
+      width: 70%;
+      padding: 10px;
+    }
+    .graph-container {
+      max-width: 100%;
+      height: 700px;  
+      margin: auto;
+      border: 1px solid #ccc;
+      padding: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    #stockChart {
+      width: 100%;
+      height: 100%;
+    }
+
+    .predictions-section {
+      padding: 20px;
+      background: #f7f7f7;
+    }
+    .predictions-section h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .predictions-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+    .prediction-item {
+      background: #fff;
+      border: 1px solid #ccc;
+      padding: 10px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+      height: 350px;              
+      display: flex;
+      flex-direction: column;     
+    }
+    .prediction-item canvas {
+      flex: 1;                    
+    }
+    .risk-analysis {
+      text-align: center;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="left-panel">
+      <h2>Real-Time Logs</h2>
+      <div id="logs"></div>
+    </div>
+    <div class="right-panel">
+      <h2>Stock Price Variation</h2>
+      <div class="graph-container">
+        <canvas id="stockChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="predictions-section">
+    <h2>Future Predictions & Risk Analysis</h2>
+    <div class="predictions-container">
+      <div class="prediction-item">
+        <canvas id="predictionChart0"></canvas>
+        <div id="riskAnalysis0" class="risk-analysis"></div>
+      </div>
+      <div class="prediction-item">
+        <canvas id="predictionChart1"></canvas>
+        <div id="riskAnalysis1" class="risk-analysis"></div>
+      </div>
+      <div class="prediction-item">
+        <canvas id="predictionChart2"></canvas>
+        <div id="riskAnalysis2" class="risk-analysis"></div>
+      </div>
+      <div class="prediction-item">
+        <canvas id="predictionChart3"></canvas>
+        <div id="riskAnalysis3" class="risk-analysis"></div>
+      </div>
+      <div class="prediction-item">
+        <canvas id="predictionChart4"></canvas>
+        <div id="riskAnalysis4" class="risk-analysis"></div>
+      </div>
+      <div class="prediction-item">
+        <canvas id="predictionChart5"></canvas>
+        <div id="riskAnalysis5" class="risk-analysis"></div>
+      </div>
+      <div class="prediction-item">
+        <canvas id="predictionChart6"></canvas>
+        <div id="riskAnalysis6" class="risk-analysis"></div>
+      </div>
+      <div class="prediction-item">
+        <canvas id="predictionChart7"></canvas>
+        <div id="riskAnalysis7" class="risk-analysis"></div>
+      </div>
+      <div class="prediction-item">
+        <canvas id="predictionChart8"></canvas>
+        <div id="riskAnalysis8" class="risk-analysis"></div>
+      </div>
+      <div class="prediction-item">
+        <canvas id="predictionChart9"></canvas>
+        <div id="riskAnalysis9" class="risk-analysis"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const MAX_LOGS = 20;
+    function addLogMessage(message) {
+      const logsDiv = document.getElementById('logs');
+      const msgElem = document.createElement('div');
+      msgElem.className = 'message';
+      msgElem.textContent = `${new Date().toLocaleTimeString()} - ${message}`;
+      logsDiv.appendChild(msgElem);
+
+      logsDiv.appendChild(document.createElement('br'));
+
+      while (logsDiv.children.length > MAX_LOGS * 2) { 
+        logsDiv.removeChild(logsDiv.firstChild);
+      }
+      logsDiv.scrollTop = logsDiv.scrollHeight;
+    }
+
+    setInterval(() => {
+      const messages = [
+        'Data pushed to Kafka.',
+        'Data backed up to GCP.',
+        'Data inserted into MongoDB.',
+        'Received new stock data.',
+        'Performing ML prediction...'
+      ];
+      const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+      addLogMessage(randomMessage);
+    }, 2000);
+
+    
+    const xDates = [];
+    const today = new Date();
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(today.getTime());
+      d.setDate(d.getDate() - (6 - i));
+      xDates.push(d.toLocaleDateString()); 
+    }
+
+    const stockNames = ["AAPL", "GOOGL", "AMZN", "MSFT", "TSLA", "FB", "NFLX", "NVDA", "BABA", "INTC"];
+    const numStocks = stockNames.length;
+    const mainDatasets = [];
+
+    for (let i = 0; i < numStocks; i++) {
+      const dataPoints = [];
+      let startingPrice = 50 + Math.random() * 100;
+      dataPoints.push({ x: xDates[0], y: startingPrice });
+
+      for (let j = 1; j < xDates.length - 1; j++) {
+        let newPrice = dataPoints[j - 1].y + (Math.random() - 0.5) * 20;
+        dataPoints.push({ x: xDates[j], y: newPrice });
+      }
+
+      let currentPrice = dataPoints[dataPoints.length - 1].y;
+      dataPoints.push({ x: xDates[xDates.length - 1], y: currentPrice });
+
+      mainDatasets.push({
+        label: stockNames[i],
+        data: dataPoints,
+        borderColor: `hsl(${(i * 36) % 360}, 70%, 50%)`,
+        backgroundColor: `hsl(${(i * 36) % 360}, 70%, 50%)`,
+        fill: false,
+        tension: 0.1
+      });
+    }
+
+    const mainCtx = document.getElementById('stockChart').getContext('2d');
+    const stockChart = new Chart(mainCtx, {
+      type: 'line',
+      data: {
+        labels: xDates,
+        datasets: mainDatasets
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          x: {
+            type: 'category',
+            title: { display: true, text: 'Date' }
+          },
+          y: {
+            suggestedMin: 0,
+            suggestedMax: 200,
+            title: { display: true, text: 'Price' }
+          }
+        }
+      }
+    });
+
+    setInterval(() => {
+      stockChart.data.datasets.forEach(dataset => {
+        let currentPrice = dataset.data[6].y;
+        let newPrice = currentPrice + (Math.random() - 0.5) * 5;  
+        dataset.data[6].y = newPrice;
+      });
+      stockChart.update();
+    }, 1000);
+
+    
+    for (let i = 0; i < numStocks; i++) {
+      let lastPrice = mainDatasets[i].data[6].y;
+      const predictedData = [];
+
+      for (let j = 0; j < 7; j++) {
+        lastPrice = lastPrice + (Math.random() - 0.5) * 5;
+        predictedData.push(lastPrice);
+      }
+
+      const mean = predictedData.reduce((a, b) => a + b, 0) / predictedData.length;
+      const variance = predictedData.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / predictedData.length;
+      const stdDev = Math.sqrt(variance);
+      let riskLevel = "Low";
+      if (stdDev >= 2 && stdDev < 4) riskLevel = "Medium";
+      else if (stdDev >= 4) riskLevel = "High";
+
+      const ctxPred = document.getElementById(`predictionChart${i}`).getContext('2d');
+      new Chart(ctxPred, {
+        type: 'line',
+        data: {
+          labels: Array.from({ length: 7 }, (_, idx) => `T+${idx + 1}`),
+          datasets: [{
+            label: stockNames[i] + " Prediction",
+            data: predictedData,
+            borderColor: `hsl(${(i * 36) % 360}, 70%, 50%)`,
+            backgroundColor: `hsl(${(i * 36) % 360}, 70%, 50%)`,
+            fill: false,
+            tension: 0.1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { title: { display: true, text: 'Future Time' } },
+            y: { title: { display: true, text: 'Price' } }
+          }
+        }
+      });
+
+      document.getElementById(`riskAnalysis${i}`).innerHTML =
+        `<strong>Risk:</strong> ${riskLevel} (Std Dev: ${stdDev.toFixed(2)})`;
+    }
+  </script>
+</body>
+</html>
