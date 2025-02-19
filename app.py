@@ -16,11 +16,11 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app)
 
-atlas_client = MongoClient("mongodb+srv://Francis:Bfe04@cluster0.0na1f.mongodb.net/")
+atlas_client = MongoClient("")#replace with mongoDB atlas cluster key
 db = atlas_client['stock_database']
 collection = db['stock_prices']
 
-gcs_client = storage.Client.from_service_account_json('srh-project-bdd-2061d9042f25.json')
+gcs_client = storage.Client.from_service_account_json('')#replace with actual google service key
 bucket_name = 'stockdata_backup'
 bucket = gcs_client.bucket(bucket_name)
 
