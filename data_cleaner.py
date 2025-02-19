@@ -4,7 +4,7 @@ from pymongo import MongoClient
 
 def clean_data():
     # Replace <your_atlas_connection_string> with your actual MongoDB Atlas connection string.
-    client = MongoClient("mongodb+srv://Francis:Bfe04@cluster0.0na1f.mongodb.net/")
+    client = MongoClient("")#replace with the actual mongoDB connection string
     db = client["stock_database"]
     collection = db["stock_prices"]
 
